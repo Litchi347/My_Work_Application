@@ -11,6 +11,11 @@
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="680dp" />
 
+    <Button
+        android:id="@+id/addButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="添加收藏" />
 </LinearLayout>

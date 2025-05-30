@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.List;
+
 public class CollectAdapter extends ArrayAdapter<CollectItem> {
     public CollectAdapter(Context context, List<CollectItem> items) {
         super(context, 0, items);

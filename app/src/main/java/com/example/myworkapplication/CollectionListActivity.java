@@ -2,14 +2,19 @@ package com.example.myworkapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -17,8 +22,20 @@ public class CollectionListActivity extends AppCompatActivity {
 
     private ListView listview;
     private CollectAdapter adapter;
-    private ArrayList<Collect> dataList;
-    private CollectDao dao;
+    private ArrayList<CollectItem> collectItemList;
+
+    private final ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String title = result.getData().getStringExtra("title");
+                    String content = result.getData().getStringExtra("content");
+                    if(title != null && content != null) {
+                        collectItemList.add(new CollectItem(title, content));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,41 +48,27 @@ public class CollectionListActivity extends AppCompatActivity {
             return insets;
         });
 
-        listview = findViewById(R.id.listview);
-        dao = new CollectDao(this);
+        collectItemList = new ArrayList<>();
+        collectItemList.add(new CollectItem("健康知识1", "关于饮食的建议"));
+        collectItemList.add(new CollectItem("健康知识2", "关于运动的建议"));
+        collectItemList.add(new CollectItem("健康知识3", "关于作息的建议"));
 
-        loadData();
+        listview = findViewById(R.id.listView);
+        adapter = new CollectAdapter(this, collectItemList);
+        listview.setAdapter(adapter);
 
-        listview.setOnItemClickListener((parent, view, position, id) -> {
-            CollectItem item = dataList.get(position);
-            Intent intent = new Intent(CollectionListActivity.this, EditItemActivity.class);
-            startActivity(intent);
+        Button addButton = findViewById(R.id.addButton);
+        addButton.setOnClickListener(v -> {
+            Intent intent = new Intent(CollectionListActivity.this, AddCollectActivity.class);
+            startActivityForResult(intent,1);
         });
-
-        listview.setOnItemLongClickListener((parent, view, position, id) -> {
-            CollectItem item = dataList.get(position);
-            dao.delete(item.getId());
-            Toast.makeText(this, "已删除" + item.getTitle(), Toast.LENGTH_SHORT).show();
-            loadData();
-            return true;
-        });
-    }
-
-    private void loadData() {
-        dataList = dao.getAll();
-        if (adapter == null) {
-            adapter = new CollectAdapter(this, dataList);
-            listview.setAdapter(adapter);
-        } else {
-            adapter.clear();
-            adapter.addAll(dataList);
-            adapter.notifyDataSetChanged();
-        }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        loadData();    // 回到列表时刷新数据
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            loadCollects();
+        }
     }
 }
