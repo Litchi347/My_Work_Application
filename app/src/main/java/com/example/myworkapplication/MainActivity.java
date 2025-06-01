@@ -1,5 +1,7 @@
 package com.example.myworkapplication;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -20,5 +22,18 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // 判断是否已登录
+        SharedPreferences prefs = getSharedPreferences("login_prefs", MODE_PRIVATE);
+        boolean isLoggedIn = prefs.getBoolean("is_logged_in", false);
+        if(isLoggedIn) {
+            // 如果已登录，跳转到收藏列表
+            startActivity(new Intent(this, CollectionListActivity.class));
+        } else {
+            // 否则跳转到登录界面
+            startActivity(new Intent(this, LoginActivity.class));
+        }
+        finish();
+
     }
 }

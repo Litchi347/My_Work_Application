@@ -44,10 +44,15 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
 
         btnLogin.setOnClickListener(v -> {
-            String username = editUsername.getText().toString().trim();
-            String password = editPassword.getText().toString().trim();
+            String username = editUsername.getText().toString();
+            String password = editPassword.getText().toString();
 
             if(username.equals("admin") && password.equals("password")) {
+                // 登录成功，保存登录状态
+                 SharedPreferences.Editor editor = getSharedPreferences("login_prefs", MODE_PRIVATE).edit();
+                 editor.putBoolean("is_logged_in", true);
+                 editor.apply();
+
                 // 登录成功，跳转到主界面
                  Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                  startActivity(intent);

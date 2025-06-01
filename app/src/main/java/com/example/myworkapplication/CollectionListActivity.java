@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CollectionListActivity extends AppCompatActivity {
 
@@ -70,5 +71,13 @@ public class CollectionListActivity extends AppCompatActivity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             loadCollects();
         }
+    }
+
+    private void loadCollects() {
+        CollectDBHelper dbHelper = new CollectDBHelper(this);
+        List<CollectItem> newItems = dbHelper.getAllCollects();
+        collectItemList.clear(); // 清空当前列表
+        collectItemList.addAll(newItems);
+        adapter.notifyDataSetChanged();
     }
 }

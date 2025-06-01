@@ -16,7 +16,7 @@ public class AddCollectActivity extends AppCompatActivity {
     private EditText editTitle;
     private EditText editContent;
     private Button btnSave;
-    private CollectDatabaseHelper dbHelper;
+    private CollectDBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public class AddCollectActivity extends AppCompatActivity {
         editContent = findViewById(R.id.editContent);
         btnSave = findViewById(R.id.btnSave);
 
-        dbHelper = new CollectDatabaseHelper(this);
+        dbHelper = new CollectDBHelper(this);
 
         btnSave.setOnClickListener(v -> {
             String title = editTitle.getText().toString();
