@@ -25,19 +25,6 @@ public class CollectionListActivity extends AppCompatActivity {
     private CollectAdapter adapter;
     private ArrayList<CollectItem> collectItemList;
 
-    private final ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    String title = result.getData().getStringExtra("title");
-                    String content = result.getData().getStringExtra("content");
-                    if(title != null && content != null) {
-                        collectItemList.add(new CollectItem(title, content));
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            });
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,28 +36,34 @@ public class CollectionListActivity extends AppCompatActivity {
             return insets;
         });
 
-        collectItemList = new ArrayList<>();
-        collectItemList.add(new CollectItem("健康知识1", "关于饮食的建议"));
-        collectItemList.add(new CollectItem("健康知识2", "关于运动的建议"));
-        collectItemList.add(new CollectItem("健康知识3", "关于作息的建议"));
+//        collectItemList.add(new CollectItem("健康知识1", "关于饮食的建议"));
+//        collectItemList.add(new CollectItem("健康知识2", "关于运动的建议"));
+//        collectItemList.add(new CollectItem("健康知识3", "关于作息的建议"));
 
         listview = findViewById(R.id.listView);
+        collectItemList = new ArrayList<>();
         adapter = new CollectAdapter(this, collectItemList);
         listview.setAdapter(adapter);
 
         Button addButton = findViewById(R.id.addButton);
         addButton.setOnClickListener(v -> {
             Intent intent = new Intent(CollectionListActivity.this, AddCollectActivity.class);
-            startActivityForResult(intent,1);
+            startActivity(intent);
         });
     }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == 1 && resultCode == RESULT_OK) {
+//            loadCollects();
+//        }
+//    }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            loadCollects();
-        }
+    protected void onResume() {
+        super.onResume();
+        loadCollects(); // 每次返回时重新加载收藏列表
     }
 
     private void loadCollects() {
@@ -80,4 +73,5 @@ public class CollectionListActivity extends AppCompatActivity {
         collectItemList.addAll(newItems);
         adapter.notifyDataSetChanged();
     }
+
 }

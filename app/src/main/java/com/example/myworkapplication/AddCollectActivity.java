@@ -40,14 +40,10 @@ public class AddCollectActivity extends AppCompatActivity {
             String content = editContent.getText().toString();
 
             if (!title.isEmpty() && !content.isEmpty()) {
-                ContentValues values = new ContentValues();
-                values.put("title", title);
-                values.put("content", content);
+                CollectItem item = new CollectItem(title, content);
+                dbHelper.addCollect(item);
 
-                dbHelper.getWritableDatabase().insert("collect", null, values);
-
-                Intent intent = new Intent();
-                setResult(RESULT_OK, intent);
+                setResult(RESULT_OK);
                 finish();
             }
         });
