@@ -1,5 +1,6 @@
 package com.example.myworkapplication;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -49,6 +50,24 @@ public class CollectionListActivity extends AppCompatActivity {
         addButton.setOnClickListener(v -> {
             Intent intent = new Intent(CollectionListActivity.this, AddCollectActivity.class);
             startActivity(intent);
+        });
+
+        listview.setOnItemClickListener((parent, view, position, id) -> {
+            CollectItem selectedItem = collectItemList.get(position);
+            new AlertDialog.Builder(CollectionListActivity.this)
+                    .setTitle(selectedItem.getTitle())
+                    .setMessage("确定要删除此收藏项吗？")
+                    .setPositiveButton("删除", (dialog, which) -> {
+                        CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
+                        dbHelper.deleteCollect(selectedItem.getId());
+
+                        collectItemList.remove(position);
+                        adapter.notifyDataSetChanged();
+
+                        Toast.makeText(CollectionListActivity.this, "已删除收藏", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("取消", null)
+                    .show();
         });
     }
 //
