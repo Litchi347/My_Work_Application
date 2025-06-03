@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -37,10 +39,6 @@ public class CollectionListActivity extends AppCompatActivity {
             return insets;
         });
 
-//        collectItemList.add(new CollectItem("健康知识1", "关于饮食的建议"));
-//        collectItemList.add(new CollectItem("健康知识2", "关于运动的建议"));
-//        collectItemList.add(new CollectItem("健康知识3", "关于作息的建议"));
-
         listview = findViewById(R.id.listView);
         collectItemList = new ArrayList<>();
         adapter = new CollectAdapter(this, collectItemList);
@@ -53,13 +51,45 @@ public class CollectionListActivity extends AppCompatActivity {
         });
 
         listview.setOnItemClickListener((parent, view, position, id) -> {
-            CollectItem selectedItem = collectItemList.get(position);
+            CollectItem item = collectItemList.get(position);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
+            builder.setTitle("修改");
+
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            final EditText titleEdit = new EditText(this);
+            titleEdit.setText(item.getTitle());
+            layout.addView(titleEdit);
+
+            final EditText contentEdit = new EditText(this);
+            contentEdit.setText(item.getContent());
+            layout.addView(contentEdit);
+
+            builder.setView(layout);
+
+            builder.setPositiveButton("保存", (dialog, which) -> {
+
+                item.setTitle(titleEdit.getText().toString());
+                item.setContent(contentEdit.getText().toString());
+
+                CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
+                dbHelper.updateCollect(item);
+                loadCollects();
+            });
+            builder.setNegativeButton("取消", null);
+            builder.show();
+        });
+
+        listview.setOnItemLongClickListener((parent, view, position, id) -> {
+            CollectItem item = collectItemList.get(position);
+
             new AlertDialog.Builder(CollectionListActivity.this)
-                    .setTitle(selectedItem.getTitle())
+                    .setTitle(item.getTitle())
                     .setMessage("确定要删除此收藏项吗？")
                     .setPositiveButton("删除", (dialog, which) -> {
                         CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
-                        dbHelper.deleteCollect(selectedItem.getId());
+                        dbHelper.deleteCollect(item.getId());
 
                         collectItemList.remove(position);
                         adapter.notifyDataSetChanged();
@@ -68,16 +98,9 @@ public class CollectionListActivity extends AppCompatActivity {
                     })
                     .setNegativeButton("取消", null)
                     .show();
+            return true;
         });
     }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == 1 && resultCode == RESULT_OK) {
-//            loadCollects();
-//        }
-//    }
 
     @Override
     protected void onResume() {
