@@ -31,4 +31,9 @@ public class CollectAdapter extends ArrayAdapter<CollectItem> {
 
         return convertView;
     }
+
+    public void setData(List<CollectItem> newlist) {
+        clear();
+        addAll(newlist);
+    }
 }
