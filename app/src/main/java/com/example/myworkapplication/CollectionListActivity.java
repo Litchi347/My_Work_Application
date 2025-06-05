@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -180,19 +181,15 @@ public class CollectionListActivity extends AppCompatActivity {
     private void searchOnline(String keyword) {
         new Thread(() -> {
             try {
-                String url = "https://baike.baidu.com/item/" + keyword;
+                String url = "https://so.dxy.cn/search?key=" + URLEncoder.encode(keyword, "UTF-8");
                 Document doc = Jsoup.connect(url).get();
 
-                // 提取词条简介
-                Elements paragraphs = doc.select("div.lemma-summary p");
-                StringBuilder content = new StringBuilder();
-                for (Element p : paragraphs) {
-                    content.append(p.text()).append("\n");
-                }
-                if (content.length() == 0) {
-                    content.append("未找到相关信息");
-                }
-                CollectItem item = new CollectItem("来自百度百科的信息：" + keyword, content.toString());
+                // 抓取第一个搜索结果的内容
+                Element firstResult = doc.selectFirst(".result-item__main");
+                String title = firstResult.selectFirst(".result-item__title").text();
+                String summary = firstResult.selectFirst(".result-item__summary").text();
+
+                CollectItem item = new CollectItem("来自丁香医生的信息：" + title, summary);
 
                 new Handler(Looper.getMainLooper()).post(() -> {
                     // 显示搜索结果
@@ -208,10 +205,6 @@ public class CollectionListActivity extends AppCompatActivity {
                 });
             }
         }).start();
-
-//        Intent intent = new Intent(this, SearchResultActivity.class);
-//        intent.putExtra("keyword", keyword);
-//        startActivity(intent);
     }
 
 }
