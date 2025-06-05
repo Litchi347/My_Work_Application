@@ -3,6 +3,8 @@ package com.example.myworkapplication;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -22,11 +24,21 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.text.TextUtils;
+import android.widget.EditText;
+import android.widget.Button;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 public class CollectionListActivity extends AppCompatActivity {
 
     private ListView listview;
     private CollectAdapter adapter;
     private ArrayList<CollectItem> collectItemList;
+    private CollectDBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,12 +112,35 @@ public class CollectionListActivity extends AppCompatActivity {
                     .show();
             return true;
         });
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadCollects(); // 每次返回时重新加载收藏列表
+        EditText editSearch = findViewById(R.id.editSearch);
+        Button btnSearch = findViewById(R.id.btnSearch);
+
+        btnSearch.setOnClickListener(v -> {
+            String keyword = editSearch.getText().toString().trim();
+            if (keyword.isEmpty()){
+                Toast.makeText(this,"请输入关键词",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            dbHelper = new CollectDBHelper(this);
+            List<CollectItem> allItems = dbHelper.getAllCollects();
+            List<CollectItem> filteredItems = new ArrayList<>();
+
+            for (CollectItem item : allItems) {
+                if (item.getTitle().contains(keyword) || item.getContent().contains(keyword) ||
+                    item.getContent().toLowerCase().contains(keyword.toLowerCase())) {
+                    filteredItems.add(item);
+                }
+            }
+
+            collectItemList.clear();
+            collectItemList.addAll(filteredItems);
+            adapter.notifyDataSetChanged();
+
+            if (filteredItems.isEmpty()){
+                searchOnline(keyword);
+            }
+        });
     }
 
     private void loadCollects() {
@@ -114,6 +149,69 @@ public class CollectionListActivity extends AppCompatActivity {
         collectItemList.clear(); // 清空当前列表
         collectItemList.addAll(newItems);
         adapter.notifyDataSetChanged();
+    }
+
+//        private void filterCollects(String keyword) {
+//            if (TextUtils.isEmpty(keyword)) {
+//                loadCollects(); // 如果没有输入关键字，重新加载所有数据
+//                return;
+//            }
+//
+//            List<CollectItem> filteredList = new ArrayList<>();
+//            for (CollectItem item : collectItemList) {
+//                if (item.getTitle().contains(keyword) ||
+//                    item.getContent().contains(keyword)) {
+//                    filteredList.add(item);
+//                }
+//            }
+//            adapter.setData(filteredList);
+//            adapter.notifyDataSetChanged();
+//        }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadCollects(); // 每次返回时重新加载收藏列表
+
+        EditText editSearch = findViewById(R.id.editSearch);
+        editSearch.setText(""); // 清空搜索框
+    }
+
+    private void searchOnline(String keyword) {
+        new Thread(() -> {
+            try {
+                String url = "https://baike.baidu.com/item/" + keyword;
+                Document doc = Jsoup.connect(url).get();
+
+                // 提取词条简介
+                Elements paragraphs = doc.select("div.lemma-summary p");
+                StringBuilder content = new StringBuilder();
+                for (Element p : paragraphs) {
+                    content.append(p.text()).append("\n");
+                }
+                if (content.length() == 0) {
+                    content.append("未找到相关信息");
+                }
+                CollectItem item = new CollectItem("来自百度百科的信息：" + keyword, content.toString());
+
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    // 显示搜索结果
+                    collectItemList.clear();
+                    collectItemList.add(item);
+                    adapter.notifyDataSetChanged();
+                    Toast.makeText(CollectionListActivity.this, "搜索完成", Toast.LENGTH_SHORT).show();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(CollectionListActivity.this, "网络获取失败" ,Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+
+//        Intent intent = new Intent(this, SearchResultActivity.class);
+//        intent.putExtra("keyword", keyword);
+//        startActivity(intent);
     }
 
 }
