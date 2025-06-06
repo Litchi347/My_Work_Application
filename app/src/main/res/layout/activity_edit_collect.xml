@@ -5,14 +5,13 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     android:orientation="vertical"
-    tools:context=".AddCollectActivity">
+    tools:context=".EditCollectActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加收藏"
+        android:text="修改收藏"
         android:textSize="40sp"
         android:gravity="center"
         android:layout_marginTop="80dp"
@@ -21,29 +20,26 @@
 
     <EditText
         android:id="@+id/editTitle"
+        android:hint="请输入标题"
+        android:textSize="25sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="输入标题"
-        android:textSize="25sp"
-        android:layout_marginTop="200dp"
-        android:minHeight="48dp" />
+        android:layout_marginTop="100dp"/>
 
     <EditText
         android:id="@+id/editContent"
+        android:hint="请输入内容"
+        android:textSize="25sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="输入内容"
-        android:textSize="25sp"
-        android:layout_marginTop="48dp"
-        android:minHeight="48dp"/>
+        android:layout_marginTop="20dp"/>
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
         android:text="保存"
-        android:textSize="20sp"
-        android:layout_marginTop="52dp"
-        android:layout_gravity="center"/>
+        android:textSize="25sp" />
 
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -21,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ import org.jsoup.select.Elements;
 
 public class CollectionListActivity extends AppCompatActivity {
 
+    private static final String TAG = "CollectionListActivity";
     private ListView listview;
     private CollectAdapter adapter;
     private ArrayList<CollectItem> collectItemList;
@@ -66,32 +69,40 @@ public class CollectionListActivity extends AppCompatActivity {
         listview.setOnItemClickListener((parent, view, position, id) -> {
             CollectItem item = collectItemList.get(position);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
-            builder.setTitle("修改");
+            Intent intent = new Intent(CollectionListActivity.this, EditCollectActivity.class);
+            intent.putExtra("id", item.getId());
+            intent.putExtra("title", item.getTitle());
+            intent.putExtra("content", item.getContent());
 
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            final EditText titleEdit = new EditText(this);
-            titleEdit.setText(item.getTitle());
-            layout.addView(titleEdit);
+            startActivityForResult(intent, 1);
 
-            final EditText contentEdit = new EditText(this);
-            contentEdit.setText(item.getContent());
-            layout.addView(contentEdit);
-
-            builder.setView(layout);
-
-            builder.setPositiveButton("保存", (dialog, which) -> {
-
-                item.setTitle(titleEdit.getText().toString());
-                item.setContent(contentEdit.getText().toString());
-
-                CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
-                dbHelper.updateCollect(item);
-                loadCollects();
-            });
-            builder.setNegativeButton("取消", null);
-            builder.show();
+//             //弹窗实现修改
+//            AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
+//            builder.setTitle("修改");
+//
+//            LinearLayout layout = new LinearLayout(this);
+//            layout.setOrientation(LinearLayout.VERTICAL);
+//            final EditText titleEdit = new EditText(this);
+//            titleEdit.setText(item.getTitle());
+//            layout.addView(titleEdit);
+//
+//            final EditText contentEdit = new EditText(this);
+//            contentEdit.setText(item.getContent());
+//            layout.addView(contentEdit);
+//
+//            builder.setView(layout);
+//
+//            builder.setPositiveButton("保存", (dialog, which) -> {
+//
+//                item.setTitle(titleEdit.getText().toString());
+//                item.setContent(contentEdit.getText().toString());
+//
+//                CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
+//                dbHelper.updateCollect(item);
+//                loadCollects();
+//            });
+//            builder.setNegativeButton("取消", null);
+//            builder.show();
         });
 
         listview.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -181,30 +192,43 @@ public class CollectionListActivity extends AppCompatActivity {
     private void searchOnline(String keyword) {
         new Thread(() -> {
             try {
-                String url = "https://so.dxy.cn/search?key=" + URLEncoder.encode(keyword, "UTF-8");
-                Document doc = Jsoup.connect(url).get();
+                String url =  "http://jib.xywy.com/search.htm?keyword=" + URLEncoder.encode(keyword, "UTF-8");
+                Document doc = Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
+                        .get();
 
-                // 抓取第一个搜索结果的内容
-                Element firstResult = doc.selectFirst(".result-item__main");
-                String title = firstResult.selectFirst(".result-item__title").text();
-                String summary = firstResult.selectFirst(".result-item__summary").text();
+                Elements result = doc.select("div.search-list ul li");
+                Log.i(TAG, "抓到结果数量: " + result.size());
 
-                CollectItem item = new CollectItem("来自丁香医生的信息：" + title, summary);
+                ArrayList<CollectItem> networkResults = new ArrayList<>();
 
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    // 显示搜索结果
-                    collectItemList.clear();
-                    collectItemList.add(item);
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(CollectionListActivity.this, "搜索完成", Toast.LENGTH_SHORT).show();
+                for (Element item : result) {
+                    String title = item.select("a").text();
+                    String summary = item.select("p").text();
+
+                    Log.i(TAG, "title: " + title);
+                    Log.i(TAG, "summary: " + summary);
+
+                    if (!TextUtils.isEmpty(title) && !TextUtils.isEmpty(summary)) {
+                        networkResults.add(new CollectItem("来自寻医问药：" + title, summary));
+                    }
+                }
+                runOnUiThread(() -> {
+                    if (networkResults.isEmpty()) {
+                        Toast.makeText(CollectionListActivity.this, "没有找到相关内容", Toast.LENGTH_SHORT).show();
+                    } else {
+                        collectItemList.clear();
+                        collectItemList.addAll(networkResults);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(CollectionListActivity.this, "网络搜索结果已加载", Toast.LENGTH_SHORT).show();
+                    }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(CollectionListActivity.this, "网络获取失败" ,Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> {
+                    Toast.makeText(CollectionListActivity.this, "网络搜索失败，请检查网络连接", Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();
     }
-
 }

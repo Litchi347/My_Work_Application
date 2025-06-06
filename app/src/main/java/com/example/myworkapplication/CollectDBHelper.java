@@ -78,9 +78,9 @@ public class CollectDBHelper extends SQLiteOpenHelper {
     public void updateCollect(CollectItem item) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_TITLE, item.getTitle());
-        values.put(COLUMN_CONTENT, item.getContent());
-        db.update(TABLE_NAME, values, COLUMN_ID + " = ?", new String[]{String.valueOf(item.getId())});
+        values.put("title", item.getTitle());
+        values.put("content", item.getContent());
+        db.update("collects", values, " id=?", new String[]{String.valueOf(item.getId())});
         db.close();
     }
 }
