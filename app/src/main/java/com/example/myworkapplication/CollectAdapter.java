@@ -30,15 +30,6 @@ public class CollectAdapter extends ArrayAdapter<CollectItem> {
         titleView.setText(item.getTitle());
         contentView.setText(item.getContent());
 
-        convertView.setOnClickListener(v -> {
-            Context context = getContext();
-            Intent intent = new Intent(context, EditCollectActivity.class);
-            intent.putExtra("id", item.getId());
-            intent.putExtra("title", item.getTitle());
-            intent.putExtra("content", item.getContent());
-            context.startActivity(intent);
-        });
-
         return convertView;
     }
 

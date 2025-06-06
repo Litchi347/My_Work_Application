@@ -1,7 +1,10 @@
 package com.example.myworkapplication;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -149,9 +152,6 @@ public class CollectionListActivity extends AppCompatActivity {
             collectItemList.addAll(filteredItems);
             adapter.notifyDataSetChanged();
 
-            if (filteredItems.isEmpty()){
-                searchOnline(keyword);
-            }
         });
     }
 
@@ -189,46 +189,4 @@ public class CollectionListActivity extends AppCompatActivity {
         editSearch.setText(""); // 清空搜索框
     }
 
-    private void searchOnline(String keyword) {
-        new Thread(() -> {
-            try {
-                String url =  "http://jib.xywy.com/search.htm?keyword=" + URLEncoder.encode(keyword, "UTF-8");
-                Document doc = Jsoup.connect(url)
-                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
-                        .get();
-
-                Elements result = doc.select("div.search-list ul li");
-                Log.i(TAG, "抓到结果数量: " + result.size());
-
-                ArrayList<CollectItem> networkResults = new ArrayList<>();
-
-                for (Element item : result) {
-                    String title = item.select("a").text();
-                    String summary = item.select("p").text();
-
-                    Log.i(TAG, "title: " + title);
-                    Log.i(TAG, "summary: " + summary);
-
-                    if (!TextUtils.isEmpty(title) && !TextUtils.isEmpty(summary)) {
-                        networkResults.add(new CollectItem("来自寻医问药：" + title, summary));
-                    }
-                }
-                runOnUiThread(() -> {
-                    if (networkResults.isEmpty()) {
-                        Toast.makeText(CollectionListActivity.this, "没有找到相关内容", Toast.LENGTH_SHORT).show();
-                    } else {
-                        collectItemList.clear();
-                        collectItemList.addAll(networkResults);
-                        adapter.notifyDataSetChanged();
-                        Toast.makeText(CollectionListActivity.this, "网络搜索结果已加载", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> {
-                    Toast.makeText(CollectionListActivity.this, "网络搜索失败，请检查网络连接", Toast.LENGTH_SHORT).show();
-                });
-            }
-        }).start();
-    }
 }
