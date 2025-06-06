@@ -6,19 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".DiseaseSearchActivity">
+    tools:context=".webSearchActivity">
 
     <EditText
-        android:id="@+id/editDisease"
+        android:id="@+id/search_input"
+        android:hint="请输入关键词"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="请输入疾病名称"/>
+        android:layout_height="wrap_content"/>
 
     <Button
-        android:id="@+id/btnSearch"
-        android:layout_width="wrap_content"
+        android:id="@+id/search_button"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="搜索"
-        android:layout_gravity="center"/>
+        android:layout_marginTop="12dp"/>
 
+    <TextView
+        android:id="@+id/search_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="等待搜索结果..."
+        android:layout_marginTop="16dp"/>
 </LinearLayout>

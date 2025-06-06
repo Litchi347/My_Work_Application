@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,15 +37,15 @@ public class AddCollectActivity extends AppCompatActivity {
         dbHelper = new CollectDBHelper(this);
 
         btnSave.setOnClickListener(v -> {
-            String title = editTitle.getText().toString();
-            String content = editContent.getText().toString();
+            String title = editTitle.getText().toString().trim();
+            String content = editContent.getText().toString().trim();
 
             if (!title.isEmpty() && !content.isEmpty()) {
-                CollectItem item = new CollectItem(title, content);
-                dbHelper.addCollect(item);
-
-                setResult(RESULT_OK);
+                dbHelper.addCollect(title, content, "manual");
+                Toast.makeText(AddCollectActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
                 finish();
+            } else {
+                Toast.makeText(AddCollectActivity.this, "标题和内容不能为空", Toast.LENGTH_SHORT).show();
             }
         });
     }

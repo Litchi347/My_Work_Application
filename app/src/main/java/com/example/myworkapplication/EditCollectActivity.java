@@ -51,7 +51,7 @@ public class EditCollectActivity extends AppCompatActivity {
                 Toast.makeText(this, "标题和内容不能为空", Toast.LENGTH_SHORT).show();
                 return;
             }
-            dbHelper.updateCollect(new CollectItem(itemId, newTitle, newContent));
+            dbHelper.updateCollect(itemId, newTitle, newContent);
             Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
             setResult(RESULT_OK);
             finish();

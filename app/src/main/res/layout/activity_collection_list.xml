@@ -19,6 +19,7 @@
             android:layout_height="wrap_content"
             android:hint="搜索收藏内容"
             android:padding="10dp" />
+
         <Button
             android:id="@+id/btnSearch"
             android:layout_width="84dp"
@@ -32,10 +33,26 @@
         android:layout_width="match_parent"
         android:layout_height="630dp" />
 
-    <Button
-        android:id="@+id/addButton"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="添加收藏"
-        android:minHeight="48dp"/>
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginBottom="0dp">
+
+        <Button
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:minHeight="48dp"
+            android:text="添加收藏" />
+
+        <Button
+            android:id="@+id/btn_open_web_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="网页搜索" />
+    </LinearLayout>
+
 </LinearLayout>

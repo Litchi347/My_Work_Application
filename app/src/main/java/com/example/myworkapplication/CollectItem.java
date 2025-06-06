@@ -5,12 +5,17 @@ public class CollectItem {
     private int id;
     private String title;
     private String content;
+    private String type;
 
+    public CollectItem() {
+        // 默认构造函数
+    }
     // 构造函数
-    public CollectItem(int id,String title, String content) {
+    public CollectItem(int id,String title, String content,String type) {
         this.id = id;
         this.title = title;
         this.content = content;
+        this.type = type;
     }
 
     public CollectItem(String title, String content) {
@@ -42,5 +47,12 @@ public class CollectItem {
         this.content = description;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
 }

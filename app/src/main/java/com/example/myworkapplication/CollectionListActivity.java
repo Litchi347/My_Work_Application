@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -44,8 +45,10 @@ public class CollectionListActivity extends AppCompatActivity {
     private static final String TAG = "CollectionListActivity";
     private ListView listview;
     private CollectAdapter adapter;
-    private ArrayList<CollectItem> collectItemList;
+    private List<CollectItem> collectList = new ArrayList<>();
     private CollectDBHelper dbHelper;
+    private EditText editSearch;
+    private Button btnSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,57 +62,53 @@ public class CollectionListActivity extends AppCompatActivity {
         });
 
         listview = findViewById(R.id.listView);
-        collectItemList = new ArrayList<>();
-        adapter = new CollectAdapter(this, collectItemList);
+        dbHelper = new CollectDBHelper(this);
+
+        collectList = dbHelper.getAllCollects();
+        adapter = new CollectAdapter(this, collectList);
         listview.setAdapter(adapter);
 
-        Button addButton = findViewById(R.id.addButton);
-        addButton.setOnClickListener(v -> {
-            Intent intent = new Intent(CollectionListActivity.this, AddCollectActivity.class);
-            startActivity(intent);
-        });
-
         listview.setOnItemClickListener((parent, view, position, id) -> {
-            CollectItem item = collectItemList.get(position);
+            CollectItem item = collectList.get(position);
+//
+//            Intent intent = new Intent(CollectionListActivity.this, EditCollectActivity.class);
+//            intent.putExtra("id", item.getId());
+//            intent.putExtra("title", item.getTitle());
+//            intent.putExtra("content", item.getContent());
+//
+//            startActivityForResult(intent, 1);
 
-            Intent intent = new Intent(CollectionListActivity.this, EditCollectActivity.class);
-            intent.putExtra("id", item.getId());
-            intent.putExtra("title", item.getTitle());
-            intent.putExtra("content", item.getContent());
+             //弹窗实现修改
+            AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
+            builder.setTitle("修改");
 
-            startActivityForResult(intent, 1);
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            final EditText titleEdit = new EditText(this);
+            titleEdit.setText(item.getTitle());
+            layout.addView(titleEdit);
 
-//             //弹窗实现修改
-//            AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
-//            builder.setTitle("修改");
-//
-//            LinearLayout layout = new LinearLayout(this);
-//            layout.setOrientation(LinearLayout.VERTICAL);
-//            final EditText titleEdit = new EditText(this);
-//            titleEdit.setText(item.getTitle());
-//            layout.addView(titleEdit);
-//
-//            final EditText contentEdit = new EditText(this);
-//            contentEdit.setText(item.getContent());
-//            layout.addView(contentEdit);
-//
-//            builder.setView(layout);
-//
-//            builder.setPositiveButton("保存", (dialog, which) -> {
-//
-//                item.setTitle(titleEdit.getText().toString());
-//                item.setContent(contentEdit.getText().toString());
-//
-//                CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
-//                dbHelper.updateCollect(item);
-//                loadCollects();
-//            });
-//            builder.setNegativeButton("取消", null);
-//            builder.show();
+            final EditText contentEdit = new EditText(this);
+            contentEdit.setText(item.getContent());
+            layout.addView(contentEdit);
+
+            builder.setView(layout);
+
+            builder.setPositiveButton("保存", (dialog, which) -> {
+
+                item.setTitle(titleEdit.getText().toString());
+                item.setContent(contentEdit.getText().toString());
+
+                CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
+                dbHelper.updateCollect(item.getId(), item.getTitle(), item.getContent());
+                loadCollects();
+            });
+            builder.setNegativeButton("取消", null);
+            builder.show();
         });
 
         listview.setOnItemLongClickListener((parent, view, position, id) -> {
-            CollectItem item = collectItemList.get(position);
+            CollectItem item = collectList.get(position);
 
             new AlertDialog.Builder(CollectionListActivity.this)
                     .setTitle(item.getTitle())
@@ -118,7 +117,7 @@ public class CollectionListActivity extends AppCompatActivity {
                         CollectDBHelper dbHelper = new CollectDBHelper(CollectionListActivity.this);
                         dbHelper.deleteCollect(item.getId());
 
-                        collectItemList.remove(position);
+                        collectList.remove(position);
                         adapter.notifyDataSetChanged();
 
                         Toast.makeText(CollectionListActivity.this, "已删除收藏", Toast.LENGTH_SHORT).show();
@@ -128,9 +127,24 @@ public class CollectionListActivity extends AppCompatActivity {
             return true;
         });
 
-        EditText editSearch = findViewById(R.id.editSearch);
-        Button btnSearch = findViewById(R.id.btnSearch);
+        Button addButton = findViewById(R.id.addButton);
+        addButton.setOnClickListener(v -> {
+            Intent intent = new Intent(CollectionListActivity.this, AddCollectActivity.class);
+            startActivity(intent);
+        });
 
+        Button btnWebSearch = findViewById(R.id.btn_open_web_search);
+        btnWebSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CollectionListActivity.this, webSearchActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+        editSearch = findViewById(R.id.editSearch);
+        btnSearch = findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(v -> {
             String keyword = editSearch.getText().toString().trim();
             if (keyword.isEmpty()){
@@ -143,13 +157,12 @@ public class CollectionListActivity extends AppCompatActivity {
 
             for (CollectItem item : allItems) {
                 if (item.getTitle().contains(keyword) || item.getContent().contains(keyword) ||
-                    item.getContent().toLowerCase().contains(keyword.toLowerCase())) {
+                        item.getContent().toLowerCase().contains(keyword.toLowerCase())) {
                     filteredItems.add(item);
                 }
             }
-
-            collectItemList.clear();
-            collectItemList.addAll(filteredItems);
+            collectList.clear();
+            collectList.addAll(filteredItems);
             adapter.notifyDataSetChanged();
 
         });
@@ -158,9 +171,41 @@ public class CollectionListActivity extends AppCompatActivity {
     private void loadCollects() {
         CollectDBHelper dbHelper = new CollectDBHelper(this);
         List<CollectItem> newItems = dbHelper.getAllCollects();
-        collectItemList.clear(); // 清空当前列表
-        collectItemList.addAll(newItems);
+        Log.i(TAG, "loadCollects: 数据库收藏数" + newItems.size());
+        collectList.clear(); // 清空当前列表
+        collectList.addAll(newItems);
         adapter.notifyDataSetChanged();
+
+        loadHealthTipsFromWeb();
+    }
+
+    private void loadHealthTipsFromWeb() {
+        new Thread(() -> {
+            try {
+                Document doc = Jsoup.connect("https://www.sohu.com/a/168688898_464393").get();
+                Elements items = doc.select(".new_list li");
+
+                ArrayList<CollectItem> tips = new ArrayList<>();
+                for (Element item : items) {
+                    Element link = item.selectFirst("a");
+                    if (link != null) {
+                        String title = link.text();
+                        tips.add(new CollectItem(-1, title,"","1"));
+                    }
+                }
+
+                runOnUiThread(() -> {
+                    collectList.addAll(tips);
+                    adapter.notifyDataSetChanged();
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(CollectionListActivity.this, "加载健康提示失败，请检查网络连接", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
 //        private void filterCollects(String keyword) {
@@ -183,10 +228,8 @@ public class CollectionListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadCollects(); // 每次返回时重新加载收藏列表
-
-        EditText editSearch = findViewById(R.id.editSearch);
-        editSearch.setText(""); // 清空搜索框
+        loadCollects();
+        editSearch.setText("");
     }
 
 }

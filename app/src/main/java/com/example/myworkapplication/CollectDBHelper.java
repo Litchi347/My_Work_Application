@@ -11,12 +11,12 @@ import java.util.List;
 
 public class CollectDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "collects.db";
-    private static final int DATABASE_VERSION = 1;
-
+    private static final int DATABASE_VERSION = 2;
     public static final String TABLE_NAME = "collects";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_CONTENT = "content";
+    public static final String COLUMN_TYPE = "type";  // 新增字段：收藏来源类型（手动、网页）
 
     public CollectDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,7 +27,8 @@ public class CollectDBHelper extends SQLiteOpenHelper {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TITLE + " TEXT, " +
-                COLUMN_CONTENT + " TEXT) ";
+                COLUMN_CONTENT + " TEXT, "+
+                COLUMN_TYPE + " TEXT)";
         db.execSQL(CREATE_TABLE);
     }
 
@@ -37,17 +38,18 @@ public class CollectDBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // 添加收藏
-    public void addCollect(CollectItem item) {
+    // 插入收藏项
+    public void addCollect(String title, String content, String type) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_TITLE, item.getTitle());
-        values.put(COLUMN_CONTENT, item.getContent());
+        values.put(COLUMN_TITLE, title);
+        values.put(COLUMN_CONTENT, content);
+        values.put(COLUMN_TYPE, type);
         db.insert(TABLE_NAME, null, values);
         db.close();
     }
 
-    // 获取所有收藏
+    // 查询所有收藏项
     public List<CollectItem> getAllCollects() {
         List<CollectItem> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -58,7 +60,7 @@ public class CollectDBHelper extends SQLiteOpenHelper {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
                 String content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT));
-                CollectItem item = new CollectItem(id, title, content);
+                CollectItem item = new CollectItem(id, title, content, cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));
                 list.add(item);
             }
             cursor.close();
@@ -67,20 +69,34 @@ public class CollectDBHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    // 删除收藏
+    // 删除某个收藏项
     public void deleteCollect(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_NAME, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
+        db.delete(TABLE_NAME, "id = ?", new String[]{String.valueOf(id)});
         db.close();
     }
 
-    // 更新收藏
-    public void updateCollect(CollectItem item) {
+    // 修改某个收藏项
+    public void updateCollect(int id, String newTitle, String newContent) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("title", item.getTitle());
-        values.put("content", item.getContent());
-        db.update("collects", values, " id=?", new String[]{String.valueOf(item.getId())});
+        values.put(COLUMN_TITLE, newTitle);
+        values.put(COLUMN_CONTENT, newContent);
+        db.update(TABLE_NAME, values, " id=?", new String[]{String.valueOf(id)});
         db.close();
+    }
+
+    // 判断某条收藏数据是否存在
+    public boolean isCollectDataExists(CollectItem item) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_NAME,
+                new String[]{"id"},
+                "type = ? AND title = ?",
+                new String[]{item.getType(), item.getTitle()},
+                null, null, null);
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        db.close();
+        return exists;
     }
 }
