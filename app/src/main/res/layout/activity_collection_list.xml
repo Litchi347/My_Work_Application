@@ -24,7 +24,8 @@
             android:id="@+id/btnSearch"
             android:layout_width="84dp"
             android:layout_height="wrap_content"
-            android:text="搜索" />
+            android:text="搜索"
+            android:backgroundTint="#DA9389"/>
 
     </LinearLayout>
 
@@ -45,14 +46,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:minHeight="48dp"
-            android:text="添加收藏" />
+            android:text="添加收藏"
+            android:backgroundTint="#DA9389"/>
 
         <Button
             android:id="@+id/btn_open_web_search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="网页搜索" />
+            android:text="网页搜索"
+            android:backgroundTint="#DA9389"/>
     </LinearLayout>
 
 </LinearLayout>

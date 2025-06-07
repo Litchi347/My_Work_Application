@@ -16,7 +16,7 @@
         android:textSize="40sp"
         android:gravity="center"
         android:layout_marginTop="80dp"
-        android:textColor="@color/material_dynamic_primary40"
+        android:textColor="#DA9389"
         android:textStyle="bold"/>
 
     <EditText
@@ -44,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="保存"
+        android:backgroundTint="#DA9389"
         android:textSize="20sp"
         android:layout_marginTop="52dp"
         android:layout_gravity="center"/>

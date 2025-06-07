@@ -28,6 +28,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class CollectionListActivity extends AppCompatActivity {
             title.setTypeface(null, Typeface.BOLD);
             title.setGravity(Gravity.CENTER);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(CollectionListActivity.this,R.style.PinkDialogButtonStyle);
             builder.setCustomTitle(title);
 
             LayoutInflater inflater = LayoutInflater.from(CollectionListActivity.this);

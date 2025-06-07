@@ -15,7 +15,7 @@
         android:textSize="40sp"
         android:gravity="center"
         android:layout_marginTop="80dp"
-        android:textColor="@color/material_dynamic_primary40"
+        android:textColor="#DA9389"
         android:textStyle="bold"/>
 
     <EditText
