@@ -12,13 +12,17 @@
         android:id="@+id/search_input"
         android:hint="请输入关键词"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:background="@android:drawable/editbox_background"
+        android:layout_marginTop="20dp"/>
 
     <Button
         android:id="@+id/search_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="搜索"
+        android:textSize="18sp"
         android:layout_marginTop="12dp"/>
 
     <TextView
@@ -26,5 +30,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="等待搜索结果..."
+        android:textSize="16sp"
         android:layout_marginTop="16dp"/>
 </LinearLayout>

@@ -3,17 +3,21 @@ package com.example.myworkapplication;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -70,7 +74,7 @@ public class CollectionListActivity extends AppCompatActivity {
 
         listview.setOnItemClickListener((parent, view, position, id) -> {
             CollectItem item = collectList.get(position);
-//
+
 //            Intent intent = new Intent(CollectionListActivity.this, EditCollectActivity.class);
 //            intent.putExtra("id", item.getId());
 //            intent.putExtra("title", item.getTitle());
@@ -79,23 +83,28 @@ public class CollectionListActivity extends AppCompatActivity {
 //            startActivityForResult(intent, 1);
 
              //弹窗实现修改
+            TextView title = new TextView(CollectionListActivity.this);
+            title.setText("修改收藏");
+            title.setTextSize(20);
+            title.setPadding(32, 32, 32, 32);
+            title.setTypeface(null, Typeface.BOLD);
+            title.setGravity(Gravity.CENTER);
+
             AlertDialog.Builder builder = new AlertDialog.Builder(CollectionListActivity.this);
-            builder.setTitle("修改");
+            builder.setCustomTitle(title);
 
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            final EditText titleEdit = new EditText(this);
-            titleEdit.setText(item.getTitle());
-            layout.addView(titleEdit);
+            LayoutInflater inflater = LayoutInflater.from(CollectionListActivity.this);
+            View dialogView = inflater.inflate(R.layout.dialog_edit_collect, null);
 
-            final EditText contentEdit = new EditText(this);
+            EditText titleEdit = dialogView.findViewById(R.id.edit_title);
+            EditText contentEdit = dialogView.findViewById(R.id.edit_content);
+
+            titleEdit.setText(item.getTitle().trim());
             contentEdit.setText(item.getContent());
-            layout.addView(contentEdit);
 
-            builder.setView(layout);
+            builder.setView(dialogView);
 
             builder.setPositiveButton("保存", (dialog, which) -> {
-
                 item.setTitle(titleEdit.getText().toString());
                 item.setContent(contentEdit.getText().toString());
 
@@ -103,6 +112,7 @@ public class CollectionListActivity extends AppCompatActivity {
                 dbHelper.updateCollect(item.getId(), item.getTitle(), item.getContent());
                 loadCollects();
             });
+
             builder.setNegativeButton("取消", null);
             builder.show();
         });

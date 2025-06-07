@@ -20,16 +20,7 @@
             android:name=".webSearchActivity"
             android:exported="false" />
         <activity
-            android:name=".HealthTipsActivity"
-            android:exported="false" />
-        <activity
             android:name=".EditCollectActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SearchResultActivity"
-            android:exported="false" />
-        <activity
-            android:name=".DiseaseSearchActivity"
             android:exported="false" />
         <activity
             android:name=".AddCollectActivity"
@@ -39,7 +30,8 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
+            android:exported="false" >
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">
